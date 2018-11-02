@@ -6,11 +6,12 @@ library(gridExtra)
 library(scales)
 library(dplyr)
 library(lubridate)
+library(here)
 
 
 # -------------------------- SETUP ----------------------------- #
 # Data source
-filename <- "C:/Users/beatonan/Documents/SWMC/Projects/Far North Hydrology and Remote Sensing Project/R Files/Ryans Code/All_Rivers.xlsx"
+filename <- here::here("import", "All_Rivers.xlsx")
 
 library(readxl)    
 read_excel_allsheets <- function(filename) {
