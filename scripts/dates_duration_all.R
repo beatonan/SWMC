@@ -224,9 +224,7 @@ l <- ggplot(data = riv_dat) +
   stat_summary(
     mapping = aes(
       x = seg_factor,
-      y = Break.Length,
-      # Dummy color aesthetic mapping for legend
-      col = "MBU"
+      y = Break.Length
     ),
     fun.ymin = function(z) {
       quantile(z, 0.25)
@@ -242,12 +240,20 @@ l <- ggplot(data = riv_dat) +
   scale_x_discrete(name = "River Reach") +
   scale_y_continuous(name = "Duration(days)") +
   coord_flip() +
+  # DUMMY GEOMS FOR LEGEND
+  geom_hline(aes(yintercept = -Inf, col = "Range")) + 
+  geom_point(aes(x = -Inf, y = Inf, shape = "Median")) + 
   # Scale color for legend
   scale_color_manual(
     name = "",
-    labels = c("Median Breakup for POR"),
+    labels = c("Range of Breakup Duration"),
     values = c("black")
   ) +
+  scale_shape_manual(
+    name = "",
+    labels = c("Median Breakup Duration"),
+    values = c(1)
+  ) + 
   theme_bw() +
   theme(
     strip.background = element_rect(fill = "white"),
@@ -259,6 +265,9 @@ l <- ggplot(data = riv_dat) +
   # Multi-row legend to match height of timing plot
   guides(
     col = guide_legend(
+      nrow = 2
+    ),
+    shape = guide_legend(
       nrow = 2
     )
   )

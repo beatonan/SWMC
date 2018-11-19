@@ -151,7 +151,9 @@ begin <- ggplot(data = riv_dat) + stat_summary(
   theme_bw() +
   text_settings +
   theme(
-    legend.position = "none"
+    legend.position = "none",
+    # Remove x axis labels
+    axis.text.x = element_blank()
   )
 
 # IO plot code
@@ -162,6 +164,7 @@ end <- ggplot(data = riv_dat) + stat_summary(
     shape = factor(severe),
     col = factor(severe)
   ),
+  show.legend = FALSE,
   fun.ymin = function(z) {
     min(z)
   },
@@ -170,27 +173,12 @@ end <- ggplot(data = riv_dat) + stat_summary(
   },
   fun.y = median, size = 0.3
 ) +
-  scale_shape_manual(
-    values = c(0, 2),
-    name = "",
-    labels = c("Less Severe", "Severe")
-  ) +
-  scale_color_manual(
-    values = c("black", "red"),
-    name = "",
-    labels = c("Less Severe", "Severe")
-  ) +
-  scale_linetype_manual(
-    name = "",
-    values = c("dotted"),
-    labels = c("Median Day of Year")
-  ) + 
   facet_grid(. ~ factor(river)) +
   geom_hline(
     data = filter(riv_dat, river == "Moose"),
-    aes(yintercept = as.numeric(as.Date((median(IO.DOY, na.rm = T)), origin = "2017-01-01")),
-        linetype = "Median")
-    ) +
+    aes(yintercept = as.numeric(as.Date((median(IO.DOY, na.rm = T)), origin = "2017-01-01"))),
+    linetype = "dotted"
+  ) +
   geom_hline(
     data = filter(riv_dat, river == "Albany"),
     aes(yintercept = as.numeric(as.Date((median(IO.DOY, na.rm = T)), origin = "2017-01-01"))),
@@ -213,14 +201,49 @@ end <- ggplot(data = riv_dat) + stat_summary(
   ) +
   scale_x_discrete(name = "Year") +
   scale_y_date(
-    name = "", 
+    name = "",
     limits = c(min.DOY, max.DOY)
-    ) +
+  ) +
+  # DUMMY GEOMS FOR LEGEND
+  geom_vline(aes(xintercept = Inf, linetype = "MedianBU")) +
+  geom_point(x = NA, y = NA, aes(alpha = "severe")) +
+  geom_hline(aes(yintercept = Inf, alpha = "notsevere")) +
+  scale_shape_manual(
+    values = c(0, 2),
+    name = "",
+    labels = c("Less Severe", "Severe")
+  ) +
+  scale_color_manual(
+    name = "",
+    values = c("black", "red"),
+    labels = c("Less Severe", "Severe")
+  ) +
+  scale_linetype_manual(
+    name = "",
+    values = c("dotted"),
+    labels = c("Median Breakup")
+  ) +
+  scale_alpha_manual(
+    name = "",
+    values = c(1, 1),
+    labels = c("Less Severe", "Severe")
+  ) +
   coord_flip() +
   theme_bw() +
   text_settings +
   theme(
-    legend.position = "bottom"
-  )
+    legend.position = "bottom",
+    # Remove facet labels
+    strip.text = element_blank()
+  ) +
+  guides(
+    alpha = guide_legend(
+      override.aes = 
+        list(
+          col = c("black", "red"),
+          shape = c(0, 2)
+        )
+      )
+    )
 
 final_plot <- grid.arrange(begin, end)
