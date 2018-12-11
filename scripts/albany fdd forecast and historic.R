@@ -89,6 +89,7 @@ source(here::here("scripts", "shield_scraper.r"))
 moose_affes <- shield_scraper(latitude = 51.2833, longitude = -80.6)
 
 ##--calculate fdd from AFFES forecast--##
+
 fdd_affes <- moose_affes %>% 
   mutate(
     fdd = max(clim_fdd$fdd) + calc_fdd(TMP),
