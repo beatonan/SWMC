@@ -92,6 +92,9 @@ riv_dat$river <- factor(
   )
 )
 
+#rename Attawap as Attawapiskat for plotting
+levels(riv_dat$river)[levels(riv_dat$river) == "Attawap"] <- "Attawapiskat"
+
 # Common plot settings for easy changes
 text_settings <- theme(
   strip.background = element_blank(),
@@ -118,7 +121,7 @@ begin <- ggplot(data = riv_dat) + stat_summary(
   fun.y = median, size = 0.3
 ) +
   scale_shape_manual(values = c(0, 2)) +
-  scale_color_manual(values = c("black", "red")) +
+  scale_color_manual(values = c("black", "black")) +
   facet_grid(. ~ factor(river)) +
   geom_hline(
     data = filter(riv_dat, river == "Moose"),
@@ -131,7 +134,7 @@ begin <- ggplot(data = riv_dat) + stat_summary(
     linetype = "dotted"
   ) +
   geom_hline(
-    data = filter(riv_dat, river == "Attawap"),
+    data = filter(riv_dat, river == "Attawapiskat"),
     aes(yintercept = as.numeric(as.Date((median(LI.DOY, na.rm = T)), origin = "2017-01-01"))),
     linetype = "dotted"
   ) +
@@ -154,7 +157,8 @@ begin <- ggplot(data = riv_dat) + stat_summary(
     legend.position = "none",
     # Remove x axis labels
     axis.text.x = element_blank()
-  )
+  ) +
+  labs(tag = "a)")
 
 # IO plot code
 end <- ggplot(data = riv_dat) + stat_summary(
@@ -185,7 +189,7 @@ end <- ggplot(data = riv_dat) + stat_summary(
     linetype = "dotted"
   ) +
   geom_hline(
-    data = filter(riv_dat, river == "Attawap"),
+    data = filter(riv_dat, river == "Attawapiskat"),
     aes(yintercept = as.numeric(as.Date((median(IO.DOY, na.rm = T)), origin = "2017-01-01"))),
     linetype = "dotted"
   ) +
@@ -211,22 +215,25 @@ end <- ggplot(data = riv_dat) + stat_summary(
   scale_shape_manual(
     values = c(0, 2),
     name = "",
-    labels = c("Less Severe", "Severe")
+    labels = c("Median Breakup Date and Range for Years without High Water", 
+               "Median Breakup Date and Range for Years with High Water")
   ) +
   scale_color_manual(
     name = "",
-    values = c("black", "red"),
-    labels = c("Less Severe", "Severe")
+    values = c("black", "black"),
+    labels = c("Median Breakup Date and Range for Years without High Water", 
+               "Median Breakup Date and Range for Years with High Water")
   ) +
   scale_linetype_manual(
     name = "",
     values = c("dotted"),
-    labels = c("Median Breakup")
+    labels = c("Median Breakup Date (2000-2017)")
   ) +
   scale_alpha_manual(
     name = "",
     values = c(1, 1),
-    labels = c("Less Severe", "Severe")
+    labels = c("Median Breakup Date and Range for Years without High Water", 
+               "Median Breakup Date and Range for Years with High Water")
   ) +
   coord_flip() +
   theme_bw() +
@@ -240,10 +247,21 @@ end <- ggplot(data = riv_dat) + stat_summary(
     alpha = guide_legend(
       override.aes = 
         list(
-          col = c("black", "red"),
+          col = c("black", "black"),
           shape = c(0, 2)
         )
       )
-    )
+    ) +
+  labs(tag = "b)")
 
+ggsave(plot = begin, filename = here::here("plots", "test.png"), height = 6.5, width = 12)
+
+
+#arrange for final plot
 final_plot <- grid.arrange(begin, end)
+
+#save plot
+ggsave(plot = final_plot, 
+       filename = here::here("plots", "bu_date_by_year_legend.tiff"), 
+       height = 6.5, width = 12,
+       dpi = "retina")

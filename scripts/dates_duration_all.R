@@ -48,6 +48,9 @@ riv_dat$river <- factor(
   levels = c("Moose", "Albany", "Attawap", "Winisk", "Severn")
 )
 
+#rename Attawap as Attawapiskat for plotting
+levels(riv_dat$river)[levels(riv_dat$river) == "Attawap"] <- "Attawapiskat"
+
 # Order rivers reaches
 # io_tdy$Location_sht  <- factor(io_tdy$Location_sht,levels=c("KNG", "FRK-HI", "HI-CHP", "CHP-FC", "FC-FB", "FB-BC", "AT", "NOCH", "SOCH", "BC"))
 
@@ -78,7 +81,7 @@ riv_dat$seg_factor <- factor(riv_dat$seg,
 
 # Plot Breakup Timing
 dates <- ggplot(data = riv_dat) +
-  # Add breakup start median markers (squares)
+  # Add breakup beginning median markers (squares)
   stat_summary(
     mapping = aes(x = seg_factor, y = as.Date(LI.DOY, origin = "2017-01-01")),
     fun.ymin = function(z) {
@@ -89,7 +92,7 @@ dates <- ggplot(data = riv_dat) +
     },
     fun.y = median, shape = 0, col = "black", alpha = 0.5, size = 0.3
   ) +
-  # Add breakup start median lines for reach river
+  # Add breakup beginning median lines for reach river
   geom_hline(
     data = filter(riv_dat, river == "Moose"),
     aes(yintercept = as.numeric(as.Date((median(LI.DOY, na.rm = T)), origin = "2017-01-01"))),
@@ -101,7 +104,7 @@ dates <- ggplot(data = riv_dat) +
     col = "black", alpha = 0.5, size = 0.3
   ) +
   geom_hline(
-    data = filter(riv_dat, river == "Attawap"),
+    data = filter(riv_dat, river == "Attawapiskat"),
     aes(yintercept = as.numeric(as.Date((median(LI.DOY, na.rm = T)), origin = "2017-01-01"))),
     col = "black", alpha = 0.5, size = 0.3
   ) +
@@ -142,7 +145,7 @@ dates <- ggplot(data = riv_dat) +
     col = "red", linetype = "dashed", size = 0.3
   ) +
   geom_hline(
-    data = filter(riv_dat, river == "Attawap"),
+    data = filter(riv_dat, river == "Attawapiskat"),
     aes(yintercept = as.numeric(as.Date((median(IO.DOY, na.rm = T)), origin = "2017-01-01"))),
     col = "red", linetype = "dashed", size = 0.3
   ) +
@@ -158,19 +161,19 @@ dates <- ggplot(data = riv_dat) +
   ) +
   facet_grid(factor(river) ~ ., scale = "free_y", space = "free_y") +
   # Dummy Geoms for legend (hacky but it works)
-  geom_point(x = NA, y = NA, aes(shape = "MedianBUStart")) +
+  geom_point(x = NA, y = NA, aes(shape = "MedianBUbeginning")) +
   geom_point(x = NA, y = NA, aes(shape = "MedianBUEnd")) +
-  geom_hline(aes(yintercept = NA, col = "VarBUStart"), linetype = "solid") +
+  geom_hline(aes(yintercept = NA, col = "VarBUbeginning"), linetype = "solid") +
   geom_hline(aes(yintercept = NA, col = "VarBUEnd"), linetype = "dashed") +
-  geom_vline(aes(xintercept = NA, linetype = "MedianPORBUStart"), col = "black") +
-  geom_vline(aes(xintercept = NA, linetype = "MedianPORBUEnd"), col = "black") +
+  geom_vline(aes(xintercept = NA, linetype = "MedianPORBUbeginning"), col = "black", alpha = 0.5) +
+  geom_vline(aes(xintercept = NA, linetype = "MedianPORBUEnd"), col = "black", alpha = 0.5) +
   # Scales
   scale_x_discrete(name = "River Reach") +
   scale_y_date(name = "Date") +
   scale_shape_manual(
     name = "",
     labels = c(
-      "Median Start of Breakup",
+      "Median Beginning of Breakup",
       "Median End of Breakup"
     ),
     values = c(0, 2)
@@ -179,16 +182,16 @@ dates <- ggplot(data = riv_dat) +
     name = "",
     values = c("solid", "dashed"),
     labels = c(
-      "Median Breakup Start (POR)",
-      "Median Breakup End (POR)"
+      "Median Beginning of Breakup (All Reaches)",
+      "Median End of Breakup (All Reaches)"
     )
   ) +
   scale_color_manual(
     name = "",
     values = c("black", "black"),
     labels = c(
-      "Variability in Breakup Start",
-      "Variability in Breakup End"
+      "Variability in Beginning of Breakup ",
+      "Variability in End of Breakup"
     )
   ) +
   coord_flip() +
@@ -217,7 +220,8 @@ dates <- ggplot(data = riv_dat) +
         color = c("black", "red")
       )
     )
-  )
+  ) +
+  labs(tag = "a)")
 
 # Breakup duration plot
 l <- ggplot(data = riv_dat) +
@@ -270,7 +274,13 @@ l <- ggplot(data = riv_dat) +
     shape = guide_legend(
       nrow = 2
     )
-  )
+  ) +
+  labs(tag = "b)")
 
 # Plot both
-grid.arrange(dates, l, widths = c(3, 1), nrow = 1)
+date_duration_plot <- grid.arrange(dates, l, widths = c(3, 1), nrow = 1)
+
+#save plot
+ggsave(plot = date_duration_plot, 
+       filename = here::here("plots", "Figure_6_bu_date_duration.tiff"), 
+       height = 7, width = 16)
